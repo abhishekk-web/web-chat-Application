@@ -15,16 +15,17 @@ async function signup(e) {
         const response = await axios.post("http://localhost:3000/user/signup", signupDetails);
         console.log(response);
         if(response.status === 200){
-            window.alert("User successfully created");
+            window.alert(response.data.message);
         }
-        else{
-            console.log(err);
+        else if(response.status === 404){
+            window.alert("User already exist");
         }
 
     }
     
     catch(err){
-        console.log(err);
+        document.body.innerHTML += `<div style="color: white;">${err}</div>`
+        window.alert("User already exist");
     }
 
 }

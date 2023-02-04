@@ -10,10 +10,12 @@ function isstringinvalid(string){
     }
 }
 
-exports.signUp = (req, res) => {
+exports.signUp = async (req, res) => {
+
+    try {
 
     const {name, email, password} = req.body;
-    console.log(email);
+    // console.log(email);
 
     if(isstringinvalid(name)|| isstringinvalid(email) || isstringinvalid(password))  {
         console.log("Okay done")
@@ -22,12 +24,27 @@ exports.signUp = (req, res) => {
 
     const saltrounds = 10;
 
-    bcrypt.hash(password, saltrounds, async (err, hash)=> {
-        console.log(err);
-        await User.create({name: name, email: email, password: hash})
-        res.status(200).json({message: "User create successfully"});
-    })
+        const users = await User.findAll({where: {email}}); // this calls the users from database through email
 
-    
+        if(users.length > 0){  // we are counting the length here that how many users are here
+
+            return res.status(404).json({success: false ,message: "User already exist"});  // it returns that the user is already exist
+
+        }
+        else{
+        
+            bcrypt.hash(password, saltrounds, async (err, hash)=> {   // here we are encrypting the password of the user
+
+                console.log(err);
+                await User.create({name: name, email: email, password: hash})
+                res.status(200).json({success: true, message: "User create successfully"});
+                
+            }) 
+        }
+    }
+
+    catch(err){
+        res.status(500).json(err);
+    }
 
 }
